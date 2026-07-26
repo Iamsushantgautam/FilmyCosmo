@@ -1,0 +1,181 @@
+.legalContainer {
+  min-height: 80vh;
+  padding: 120px var(--spacing-xl) 60px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.legalCard {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.5px;
+}
+
+.lastUpdated {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.disclaimerBanner {
+  background: rgba(229, 9, 20, 0.12);
+  border-left: 4px solid var(--accent-red);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 8px;
+}
+
+.disclaimerBanner p {
+  color: #ffffff;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  font-weight: 600;
+  margin: 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.section p, .section ul {
+  font-size: 0.96rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 0;
+}
+
+.section ul {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.emailLink {
+  color: var(--accent-red);
+  font-weight: 700;
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.emailLink:hover {
+  color: #f40612;
+  text-decoration: underline;
+}
+
+/* Contact Form Styling */
+.contactGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.input, .textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: all var(--transition-fast);
+}
+
+.input:focus, .textarea:focus {
+  border-color: var(--accent-red);
+  background: rgba(255, 255, 255, 0.09);
+  outline: none;
+}
+
+.textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.submitBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: var(--accent-red);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 800;
+  border-radius: 30px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(229, 9, 20, 0.4);
+  transition: all var(--transition-fast);
+  align-self: flex-start;
+}
+
+.submitBtn:hover {
+  background: #f40612;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(229, 9, 20, 0.6);
+}
+
+.successMsg {
+  background: rgba(40, 167, 69, 0.2);
+  border: 1px solid rgba(40, 167, 69, 0.4);
+  color: #2ecc71;
+  padding: 14px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .legalContainer {
+    padding: 135px 16px 40px;
+  }
+  .legalCard {
+    padding: 24px 18px;
+  }
+  .title {
+    font-size: 1.75rem;
+  }
+  .contactGrid {
+    grid-template-columns: 1fr;
+  }
+}

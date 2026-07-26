@@ -1,0 +1,48 @@
+.logoWrapper {
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.logoSvg {
+  height: 100%;
+  width: auto;
+  display: block;
+}
+
+/* Sizing Options */
+.small {
+  height: 32px;
+}
+
+.medium {
+  height: 40px;
+}
+
+.large {
+  height: 54px;
+}
+
+/* Theme Variants */
+.light .cosmoText {
+  fill: #ffffff;
+}
+
+.dark .cosmoText {
+  fill: #141414;
+}
+
+.auto .cosmoText {
+  fill: #ffffff;
+}
+
+@media (max-width: 480px) {
+  .medium {
+    height: 34px;
+  }
+  .large {
+    height: 42px;
+  }
+}

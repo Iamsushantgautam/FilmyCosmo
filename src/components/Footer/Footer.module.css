@@ -1,0 +1,104 @@
+.footer {
+  width: 100%;
+  background-color: #0d121f;
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.footerContent {
+  width: 100%;
+  max-width: 1200px;
+  padding: clamp(24px, 4vw, 40px) 20px clamp(20px, 3vw, 32px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 3vw, 28px);
+  text-align: center;
+}
+
+.telegramBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1.5vw, 12px);
+  background: linear-gradient(135deg, #0088cc 0%, #00a8e8 100%);
+  color: #ffffff;
+  font-weight: 700;
+  text-decoration: none;
+  border-radius: 50px;
+  font-size: clamp(0.85rem, 1.5vw + 0.4rem, 1.1rem);
+  padding: clamp(10px, 1.5vw + 4px, 15px) clamp(20px, 3vw + 10px, 38px);
+  box-shadow: 0 0 20px rgba(0, 168, 232, 0.45);
+  transition: all 0.25s ease-in-out;
+  cursor: pointer;
+  max-width: 90%;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.telegramBtn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 30px rgba(0, 168, 232, 0.7);
+  background: linear-gradient(135deg, #0099e6 0%, #00b8f8 100%);
+}
+
+.telegramBtn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.telegramIcon {
+  width: clamp(18px, 2.2vw, 24px);
+  height: clamp(18px, 2.2vw, 24px);
+  flex-shrink: 0;
+}
+
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2.5vw, 28px);
+}
+
+.footerLinks a {
+  color: #94a3b8;
+  font-size: clamp(0.78rem, 1.2vw + 0.35rem, 0.92rem);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  font-weight: 500;
+}
+
+.footerLinks a:hover {
+  color: #ffffff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+.copyrightBar {
+  width: 100%;
+  background-color: #070912;
+  padding: clamp(12px, 2vw, 18px) 20px;
+  text-align: center;
+  color: #64748b;
+  font-size: clamp(0.72rem, 1vw + 0.35rem, 0.84rem);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .footerLinks {
+    gap: 12px 18px;
+  }
+}
+
+@media (max-width: 380px) {
+  .telegramBtn {
+    width: 100%;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+  }
+}
+

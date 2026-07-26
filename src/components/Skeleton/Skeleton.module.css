@@ -1,0 +1,37 @@
+.skeletonPulse {
+  background-color: var(--bg-surface-elevated);
+  animation: pulseSkeleton 1.5s infinite ease-in-out;
+  border-radius: var(--radius-sm);
+}
+
+.heroSkeleton {
+  width: 100%;
+  height: 60vh;
+  min-height: 450px;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-xl);
+}
+
+.cardSkeleton {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-md);
+}
+
+.gridSkeleton {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--spacing-md);
+}
+
+@media (max-width: 1200px) {
+  .gridSkeleton {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .gridSkeleton {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

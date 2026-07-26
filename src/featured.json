@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "intervalMs": 4000,
+  "maxItems": 8,
+  "selectedMovieIds": [],
+  "featuredKeywords": []
+}

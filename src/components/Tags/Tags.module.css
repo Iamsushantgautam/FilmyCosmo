@@ -1,0 +1,29 @@
+.tagContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-sm) 0;
+}
+
+.tagChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: var(--bg-surface-elevated);
+  color: var(--text-secondary);
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 500;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.tagChip:hover {
+  background: var(--accent-red);
+  color: #FFFFFF;
+}
+
+.activeTag {
+  background: var(--accent-red);
+  color: #FFFFFF;
+}

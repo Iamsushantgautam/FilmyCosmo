@@ -1,0 +1,77 @@
+[
+  {
+    "id": "trending",
+    "title": "Trending Now",
+    "type": "trending"
+  },
+  {
+    "id": "recentlyAdded",
+    "title": "Recently Added",
+    "type": "recentlyAdded",
+    "viewAllLink": "/movies",
+    "limit": 50
+  },
+  {
+    "id": "myList",
+    "title": "My Watchlist",
+    "type": "myList",
+    "viewAllLink": "/my-list",
+    "limit": 50
+  },
+  {
+    "id": "bollywood",
+    "title": "Bollywood Movies",
+    "type": "category",
+    "category": "Bollywood",
+    "viewAllLink": "/category/Bollywood",
+    "limit": 50
+  },
+  {
+    "id": "hollywood",
+    "title": "Hollywood Movies",
+    "type": "category",
+    "category": "Hollywood",
+    "viewAllLink": "/category/Hollywood",
+    "limit": 50
+  },
+  {
+    "id": "south",
+    "title": "South Movies",
+    "type": "category",
+    "category": "South",
+    "viewAllLink": "/category/South",
+    "limit": 50
+  },
+  {
+    "id": "marvel",
+    "title": "Marvel",
+    "type": "category",
+    "category": "Marvel",
+    "viewAllLink": "/category/Marvel",
+    "limit": 50
+  },
+  {
+    "id": "spiderman",
+    "title": "Spider-Man Collection",
+    "type": "category",
+    "category": "SpiderMan",
+    "viewAllLink": "/category/SpiderMan",
+    "limit": 50
+  },
+  {
+    "id": "webseries",
+    "title": "Web Series & TV Shows",
+    "type": "category",
+    "category": "WebSeries",
+    "viewAllLink": "/category/WebSeries",
+    "limit": 50
+  },
+  {
+    "id": "animation",
+    "title": "Animation & Anime",
+    "type": "category",
+    "category": "Animation,animated,cartoon,anime",
+    "viewAllLink": "/category/Animation",
+    "limit": 50
+  }
+]

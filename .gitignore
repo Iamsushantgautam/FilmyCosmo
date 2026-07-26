@@ -1,0 +1,48 @@
+# Environment & Secrets (NEVER COMMIT TO GIT)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+*.env
+
+# Cache & Temporary JSON Data
+last_proxy_res.json
+*.tmp
+*.temp
+
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Build Outputs
+dist/
+dist-ssr/
+build/
+.vercel/
+
+# Logs & Debug
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# IDE & Editor Files
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.gemini/
+
+# System Files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "Bollywood",
+    "name": "Bollywood",
+    "keywords": [
+      "bollywood"
+    ]
+  },
+  {
+    "id": "Hollywood",
+    "name": "Hollywood",
+    "keywords": [
+      "hollywood"
+    ]
+  },
+  {
+    "id": "South",
+    "name": "South Movies",
+    "keywords": [
+      "south",
+      "telugu",
+      "tamil",
+      "kannada",
+      "malayalam"
+    ]
+  },
+  {
+    "id": "WebSeries",
+    "name": "Web Series",
+    "keywords": [
+      "web series",
+      "webseries",
+      "tv show",
+      "tvshow",
+      "season",
+      "series"
+    ]
+  },
+  {
+    "id": "Marvel",
+    "name": "Marvel",
+    "keywords": [
+      "marvel",
+      "avengers",
+      "mcu",
+      "superhero",
+      "iron man",
+      "thor"
+    ]
+  },
+  {
+    "id": "SpiderMan",
+    "name": "Spider-Man",
+    "keywords": [
+      "spider-man",
+      "spiderman",
+      "peter parker",
+      "spider man"
+    ]
+  },
+  {
+    "id": "Animation",
+    "name": "Animation & Anime",
+    "keywords": [
+      "animation",
+      "anime",
+      "animated",
+      "fantasy anime",
+      "cartoon"
+    ]
+  }
+]
