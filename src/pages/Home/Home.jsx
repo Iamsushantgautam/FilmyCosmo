@@ -1,6 +1,7 @@
 import React from 'react';
 import { useMovieContext } from '../../context/MovieContext';
 import { isMovieInCategory } from '../../config/categories';
+import { groupAndSortSameTitleMovies } from '../../utils/filter';
 import sectionsData from '../../sections.json';
 import featuredConfig from '../../featured.json';
 import Hero from '../../components/Hero/Hero';
@@ -52,19 +53,19 @@ export default function Home() {
   // Helper function to resolve section movies list dynamically based on section config
   const getSectionMovies = (section) => {
     const limit = section.limit || 50;
+    let list = [];
+
     if (section.type === 'trending') {
-      return trendingMovies.slice(0, limit);
+      list = trendingMovies.slice(0, limit);
+    } else if (section.type === 'recentlyAdded' || section.type === 'newreleases') {
+      list = recentlyAddedMovies.slice(0, limit);
+    } else if (section.type === 'myList' || section.type === 'saved') {
+      list = savedMovies.slice(0, limit);
+    } else if (section.category || section.type === 'category') {
+      list = movies.filter(m => isMovieInCategory(m, section.category, section)).slice(0, limit);
     }
-    if (section.type === 'recentlyAdded') {
-      return recentlyAddedMovies.slice(0, limit);
-    }
-    if (section.type === 'myList' || section.type === 'saved') {
-      return savedMovies.slice(0, limit);
-    }
-    if (section.type === 'category' && section.category) {
-      return movies.filter(m => isMovieInCategory(m, section.category)).slice(0, limit);
-    }
-    return [];
+
+    return groupAndSortSameTitleMovies(list);
   };
 
   if (loading && movies.length === 0) {

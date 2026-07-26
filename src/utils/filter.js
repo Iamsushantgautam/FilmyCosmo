@@ -50,12 +50,87 @@ export function extractTerms(movies) {
 }
 
 /**
+ * Extract base title key for grouping related movies / sequels / same title movies
+ */
+export function getBaseTitleKey(title = '') {
+  if (!title || typeof title !== 'string') return '';
+  return title
+    .toLowerCase()
+    .replace(/\(\d{4}\)/g, '')
+    .replace(/\[[^\]]+\]/g, '')
+    .replace(/\{[^}]+\}/g, '')
+    .replace(/:\s*.*/g, '')
+    .replace(/-\s*.*/g, '')
+    .replace(/\b(returns|again|reloaded|chapter|part|season|series|collection|trilogy|edition)\b.*/gi, '')
+    .replace(/[\d\s._-]+$/g, '')
+    .replace(/[^\w\s]/g, '')
+    .trim();
+}
+
+/**
+ * Group movies with same title or base title together, ordered chronologically by release year
+ */
+export function groupAndSortSameTitleMovies(movies) {
+  if (!Array.isArray(movies) || movies.length <= 1) return movies;
+
+  const getYearNum = (m) => {
+    const raw = String(m.releaseDate || m.year || m.movie_year || '');
+    const match = raw.match(/\b(19\d\d|20\d\d)\b/);
+    return match ? parseInt(match[1], 10) : 0;
+  };
+
+  // Map base keys to matching movies list
+  const baseKeyMap = new Map();
+  movies.forEach(m => {
+    if (!m) return;
+    const key = getBaseTitleKey(m.title);
+    if (key && key.length >= 2) {
+      if (!baseKeyMap.has(key)) baseKeyMap.set(key, []);
+      baseKeyMap.get(key).push(m);
+    }
+  });
+
+  // Collect keys that have multiple movies and sort within group by year
+  const groupedKeys = new Set();
+  baseKeyMap.forEach((list, key) => {
+    if (list.length > 1) {
+      list.sort((a, b) => getYearNum(a) - getYearNum(b));
+      groupedKeys.add(key);
+    }
+  });
+
+  // Construct result list grouping same-title movies together
+  const result = [];
+  const processedIds = new Set();
+
+  movies.forEach(m => {
+    if (!m || processedIds.has(m.id)) return;
+
+    const key = getBaseTitleKey(m.title);
+    if (key && groupedKeys.has(key)) {
+      const groupMovies = baseKeyMap.get(key);
+      groupMovies.forEach(gm => {
+        if (!processedIds.has(gm.id)) {
+          processedIds.add(gm.id);
+          result.push(gm);
+        }
+      });
+    } else {
+      processedIds.add(m.id);
+      result.push(m);
+    }
+  });
+
+  return result;
+}
+
+/**
  * Filter movies by active Category, Genre, and Term filters
  */
 export function filterMovies(movies, { category = 'All', genre = 'All', term = 'All' } = {}) {
   if (!Array.isArray(movies)) return [];
 
-  return movies.filter(movie => {
+  const filtered = movies.filter(movie => {
     if (!movie) return false;
 
     // Filter Category
@@ -98,4 +173,7 @@ export function filterMovies(movies, { category = 'All', genre = 'All', term = '
 
     return true;
   });
+
+  return groupAndSortSameTitleMovies(filtered);
 }
+

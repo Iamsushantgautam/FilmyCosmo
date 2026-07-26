@@ -1,3 +1,5 @@
+import { groupAndSortSameTitleMovies } from './filter';
+
 /**
  * Debounce helper function
  */
@@ -25,7 +27,7 @@ export function searchMovies(movies, query) {
   const cleanQuery = query.toLowerCase().trim();
   const queryTokens = cleanQuery.split(/\s+/).filter(Boolean);
 
-  return movies.filter(movie => {
+  const matched = movies.filter(movie => {
     if (!movie) return false;
 
     const title = String(movie.title || '').toLowerCase();
@@ -57,4 +59,7 @@ export function searchMovies(movies, query) {
     // Match all query token parts (multi-word fuzzy search)
     return queryTokens.every(token => searchableText.includes(token));
   });
+
+  return groupAndSortSameTitleMovies(matched);
 }
+

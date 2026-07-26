@@ -8,8 +8,16 @@ import { GridSkeleton } from '../../components/Skeleton/Skeleton';
 import styles from './Movies.module.css';
 
 export default function Movies() {
-  const { filteredMovies, loading } = useMovieContext();
+  const { filteredMovies, loading, searchQuery, setSearchQuery, resetFilters } = useMovieContext();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Sync searchQuery from URL parameter if present on mount e.g. /movies?q=avatar
+  useEffect(() => {
+    const qFromUrl = searchParams.get('q') || searchParams.get('search');
+    if (qFromUrl && qFromUrl !== searchQuery) {
+      setSearchQuery(qFromUrl);
+    }
+  }, [searchParams]);
 
   const {
     items: paginatedMovies,
@@ -30,7 +38,11 @@ export default function Movies() {
 
   const handlePageChange = (page) => {
     goToPage(page);
-    setSearchParams({ page: String(page) });
+    setSearchParams(prev => {
+      const params = new URLSearchParams(prev);
+      params.set('page', String(page));
+      return params;
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -42,36 +54,41 @@ export default function Movies() {
     );
   }
 
-  const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-  const endItem = Math.min(currentPage * pageSize, totalItems);
-
   return (
     <div className={`page-section ${styles.moviesPage}`}>
       <div className={styles.header}>
-        <h1 className={styles.title}>All Movies</h1>
-        <p className={styles.subTitle}>Browse complete high-quality movie library</p>
+        <h1 className={styles.title}>
+          {searchQuery.trim() ? `Search Results for "${searchQuery}"` : 'All Movies'}
+        </h1>
+        <p className={styles.subTitle}>
+          {searchQuery.trim()
+            ? totalItems > 0
+              ? `Found ${totalItems} movie${totalItems === 1 ? '' : 's'}`
+              : `No movies found for "${searchQuery}"`
+            : 'Browse complete high-quality movie library'}
+        </p>
       </div>
 
-      <div className={styles.metaRow}>
-        <span className={styles.count}>
-          {totalItems > 0
-            ? `Showing ${startItem} - ${endItem} of ${totalItems} Movies`
-            : 'No movies found'}
-        </span>
-        {totalPages > 1 && (
-          <span className={styles.pageIndicator}>
-            Page {currentPage} of {totalPages}
-          </span>
-        )}
-      </div>
+      {totalItems === 0 && searchQuery.trim() ? (
+        <div className={styles.simpleNoResults}>
+          <span>Try a different search term or </span>
+          <button className={styles.simpleClearBtn} onClick={resetFilters}>
+            Clear Search
+          </button>
+        </div>
+      ) : (
+        <>
+          <MovieGrid movies={paginatedMovies} />
 
-      <MovieGrid movies={paginatedMovies} />
-
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={handlePageChange}
-      />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </>
+      )}
     </div>
   );
 }
+
+

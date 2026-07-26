@@ -2,17 +2,20 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useMovieContext } from '../../context/MovieContext';
 import { MAIN_CATEGORIES } from '../../config/categories';
+import { getMovieSlug } from '../../utils/helpers';
 import Logo from '../Logo/Logo';
 import styles from './Navbar.module.css';
 
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { searchQuery, setSearchQuery, savedMovies } = useMovieContext();
+  const { searchQuery, setSearchQuery, savedMovies, filteredMovies } = useMovieContext();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const searchInputRef = useRef(null);
+  const searchContainerRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,32 +44,77 @@ export default function Navbar() {
     }
   }, [searchExpanded]);
 
-  const handleSearchToggle = () => {
+  // Close dropdown suggestions when clicking outside or pressing Escape
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
+  const handleSearchSubmit = (e) => {
+    if (e) e.preventDefault();
+    if (searchQuery.trim()) {
+      setShowSuggestions(false);
+      if (location.pathname !== '/movies') {
+        navigate('/movies');
+      }
+      if (searchInputRef.current) {
+        searchInputRef.current.blur();
+      }
+    }
+  };
+
+  const handleSearchToggle = (e) => {
+    if (e) e.preventDefault();
     if (searchExpanded) {
-      if (searchQuery) {
-        setSearchQuery('');
+      if (searchQuery.trim()) {
+        handleSearchSubmit(e);
       } else {
         setSearchExpanded(false);
+        setShowSuggestions(false);
       }
     } else {
       setSearchExpanded(true);
+      setShowSuggestions(true);
     }
   };
 
   const handleSearchChange = (e) => {
     const val = e.target.value;
     setSearchQuery(val);
-    if (val.trim() && location.pathname !== '/movies' && location.pathname !== '/') {
+    setShowSuggestions(true);
+    if (val.trim() && location.pathname !== '/movies') {
       navigate('/movies');
     }
   };
 
   const handleSearchClose = () => {
     setSearchQuery('');
+    setShowSuggestions(false);
     setSearchExpanded(false);
   };
 
+  const handleSelectSuggestion = (movie) => {
+    setShowSuggestions(false);
+    setSearchExpanded(false);
+    navigate(`/movie/${getMovieSlug(movie)}`);
+  };
+
   const isActive = (path) => location.pathname === path;
+  const suggestionList = searchQuery.trim() ? filteredMovies.slice(0, 6) : [];
 
   return (
     <header className={`${styles.navbarHeader} ${isScrolled ? styles.scrolled : ''}`}>
@@ -107,13 +155,17 @@ export default function Navbar() {
         </div>
 
         {/* Right Section: Desktop Search & Watchlist Actions */}
-        <div className={styles.rightSection}>
+        <div className={styles.rightSection} ref={searchContainerRef}>
           {/* Desktop Left-Expanding Inline Search Box */}
-          <div className={`${styles.inlineSearchWrapper} ${searchExpanded ? styles.searchExpanded : ''}`}>
+          <form
+            onSubmit={handleSearchSubmit}
+            className={`${styles.inlineSearchWrapper} ${searchExpanded ? styles.searchExpanded : ''}`}
+          >
             <button
+              type="button"
               className={styles.searchToggleBtn}
               onClick={handleSearchToggle}
-              aria-label="Toggle Search"
+              aria-label="Search"
               title="Search Movies"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
@@ -129,13 +181,12 @@ export default function Navbar() {
               placeholder="Titles, genres, language..."
               value={searchQuery}
               onChange={handleSearchChange}
-              onBlur={() => {
-                if (!searchQuery.trim()) setSearchExpanded(false);
-              }}
+              onFocus={() => setShowSuggestions(true)}
             />
 
             {searchExpanded && searchQuery && (
               <button
+                type="button"
                 className={styles.searchClearBtn}
                 onClick={handleSearchClose}
                 aria-label="Clear search text"
@@ -143,7 +194,51 @@ export default function Navbar() {
                 ✕
               </button>
             )}
-          </div>
+
+            {/* Desktop Live Search Dropdown Suggestions */}
+            {searchExpanded && showSuggestions && searchQuery.trim().length >= 2 && (
+              <div className={styles.searchSuggestionsDropdown}>
+                {suggestionList.length > 0 ? (
+                  <>
+                    {suggestionList.map(movie => (
+                      <div
+                        key={movie.id}
+                        className={styles.suggestionItem}
+                        onClick={() => handleSelectSuggestion(movie)}
+                      >
+                        {movie.poster ? (
+                          <img
+                            src={movie.poster}
+                            alt={movie.title}
+                            className={styles.suggestionPoster}
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className={styles.suggestionPosterPlaceholder} />
+                        )}
+                        <div className={styles.suggestionMeta}>
+                          <span className={styles.suggestionTitle}>{movie.title}</span>
+                          <span className={styles.suggestionSub}>
+                            {movie.category || 'Movie'} {movie.releaseDate ? `• ${movie.releaseDate}` : ''}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                    <div
+                      className={styles.suggestionFooter}
+                      onClick={handleSearchSubmit}
+                    >
+                      See all {filteredMovies.length} results for "{searchQuery}" →
+                    </div>
+                  </>
+                ) : (
+                  <div className={styles.noSuggestionItem}>
+                    No movies found matching "{searchQuery}"
+                  </div>
+                )}
+              </div>
+            )}
+          </form>
 
           {/* Watchlist Quick Shortcut */}
           <Link to="/my-list" className={styles.iconBtn} aria-label="My Watchlist" title="My Watchlist">
@@ -168,7 +263,7 @@ export default function Navbar() {
 
       {/* Mobile Sub-Header Search Bar (Appears directly below header on mobile) */}
       <div className={styles.mobileSubHeaderBar}>
-        <div className={styles.mobileSubSearchBox}>
+        <form onSubmit={handleSearchSubmit} className={styles.mobileSubSearchBox}>
           <svg className={styles.mobileSubSearchIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
             <circle cx="11" cy="11" r="8"></circle>
             <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
@@ -181,9 +276,9 @@ export default function Navbar() {
             onChange={handleSearchChange}
           />
           {searchQuery && (
-            <button className={styles.mobileSubClearBtn} onClick={() => setSearchQuery('')}>✕</button>
+            <button type="button" className={styles.mobileSubClearBtn} onClick={() => setSearchQuery('')}>✕</button>
           )}
-        </div>
+        </form>
       </div>
 
       {/* Mobile BackDrop Overlay */}
@@ -248,3 +343,4 @@ export default function Navbar() {
     </header>
   );
 }
+

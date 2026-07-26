@@ -101,3 +101,30 @@
   font-weight: 700 !important;
 }
 
+.simpleNoResults {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.simpleClearBtn {
+  background: transparent;
+  border: none;
+  color: var(--accent-red);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  transition: color 0.15s ease;
+}
+
+.simpleClearBtn:hover {
+  color: #ff333d;
+}
+
+
+

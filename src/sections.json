@@ -19,6 +19,13 @@
     "limit": 50
   },
   {
+    "id": "new",
+    "title": "New Releases",
+    "type": "category",
+    "category": "new , new-july-2026",
+    "tagOnly": true
+  },
+  {
     "id": "bollywood",
     "title": "Bollywood Movies",
     "type": "category",

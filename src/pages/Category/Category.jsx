@@ -75,8 +75,6 @@ export default function Category() {
     );
   }
 
-  const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
-  const endItem = Math.min(currentPage * pageSize, totalItems);
   const currentCategoryConfig = MAIN_CATEGORIES.find(c => c.id.toLowerCase() === selectedCategory.toLowerCase() || c.name.toLowerCase() === selectedCategory.toLowerCase());
   const displayCategoryName = currentCategoryConfig ? currentCategoryConfig.name : selectedCategory;
   const activeTitle = displayCategoryName.toLowerCase().includes('movie') || displayCategoryName.toLowerCase().includes('series') ? displayCategoryName : `${displayCategoryName} Movies`;
@@ -126,19 +124,6 @@ export default function Category() {
       )}
 
 
-
-      <div className={styles.metaRow}>
-        <span className={styles.count}>
-          {totalItems > 0
-            ? `Showing ${startItem} - ${endItem} of ${totalItems} Movies`
-            : `No ${displayCategoryName} movies found`}
-        </span>
-        {totalPages > 1 && (
-          <span className={styles.pageIndicator}>
-            Page {currentPage} of {totalPages}
-          </span>
-        )}
-      </div>
 
       <MovieGrid movies={paginatedMovies} />
 
