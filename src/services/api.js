@@ -51,53 +51,67 @@ export function normalizeMovie(item, index) {
   // Extract Real Genres (FilmyCosmo API field: movie_genre)
   let genres = [];
   if (Array.isArray(item.movie_genre)) {
-    genres = item.movie_genre;
+    genres = item.movie_genre.map(g => String(g).trim()).filter(Boolean);
   } else if (Array.isArray(item.genres)) {
-    genres = item.genres;
+    genres = item.genres.map(g => String(g).trim()).filter(Boolean);
   } else if (typeof item.movie_genre === 'string') {
     genres = item.movie_genre.split(/[,/|]+/).map(g => g.trim()).filter(Boolean);
+  } else if (typeof item.genres === 'string') {
+    genres = item.genres.split(/[,/|]+/).map(g => g.trim()).filter(Boolean);
   }
 
   // Extract Real Category (FilmyCosmo API field: movie_category)
   let category = '';
   if (Array.isArray(item.movie_category) && item.movie_category.length > 0) {
-    category = item.movie_category.join(' / ');
+    category = item.movie_category.map(c => String(c).trim()).filter(Boolean).join(' / ');
   } else if (typeof item.movie_category === 'string' && item.movie_category.trim()) {
     category = item.movie_category.trim();
+  } else if (Array.isArray(item.category) && item.category.length > 0) {
+    category = item.category.map(c => String(c).trim()).filter(Boolean).join(' / ');
   } else if (item.category) {
-    category = String(item.category);
+    category = String(item.category).trim();
   }
 
   // Extract Real Movie Type (FilmyCosmo API field: movie_type)
   let movieType = '';
   if (Array.isArray(item.movie_type) && item.movie_type.length > 0) {
-    movieType = item.movie_type.join(' / ');
+    movieType = item.movie_type.map(t => String(t).trim()).filter(Boolean).join(' / ');
   } else if (typeof item.movie_type === 'string' && item.movie_type.trim()) {
     movieType = item.movie_type.trim();
+  } else if (Array.isArray(item.type) && item.type.length > 0) {
+    movieType = item.type.map(t => String(t).trim()).filter(Boolean).join(' / ');
   } else if (item.type) {
-    movieType = String(item.type);
+    movieType = String(item.type).trim();
   }
 
   // Extract Real Language (FilmyCosmo API field: movie_language)
   let language = '';
   if (Array.isArray(item.movie_language)) {
-    language = item.movie_language.join(' + ');
+    language = item.movie_language.map(l => String(l).trim()).filter(Boolean).join(' + ');
   } else if (typeof item.movie_language === 'string') {
-    language = item.movie_language;
+    language = item.movie_language.trim();
+  } else if (Array.isArray(item.language)) {
+    language = item.language.map(l => String(l).trim()).filter(Boolean).join(' + ');
   } else if (item.language) {
-    language = item.language;
+    language = String(item.language).trim();
   }
 
   // Extract Real Tags & Terms (FilmyCosmo API fields: movie_tags, terms)
   let terms = [];
   if (Array.isArray(item.movie_tags)) {
-    terms.push(...item.movie_tags);
+    terms.push(...item.movie_tags.map(t => String(t)));
+  } else if (typeof item.movie_tags === 'string') {
+    terms.push(...item.movie_tags.split(/[,/|]+/));
   }
   if (Array.isArray(item.terms)) {
-    terms.push(...item.terms);
+    terms.push(...item.terms.map(t => String(t)));
+  } else if (typeof item.terms === 'string') {
+    terms.push(...item.terms.split(/[,/|]+/));
   }
   if (genres.length > 0) terms.push(...genres);
-  if (language) terms.push(...language.split(/[\s+/,-]+/));
+  if (typeof language === 'string' && language.trim()) {
+    terms.push(...language.split(/[\s+/,-]+/));
+  }
   if (item.movie_year) terms.push(String(item.movie_year));
 
   // Filter out long title strings, search sentences, or invalid keywords

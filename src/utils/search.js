@@ -28,12 +28,12 @@ export function searchMovies(movies, query) {
   return movies.filter(movie => {
     if (!movie) return false;
 
-    const title = (movie.title || '').toLowerCase();
-    const category = (movie.category || '').toLowerCase();
-    const language = (movie.language || '').toLowerCase();
+    const title = String(movie.title || '').toLowerCase();
+    const category = String(movie.category || '').toLowerCase();
+    const language = String(movie.language || '').toLowerCase();
     const year = String(movie.releaseDate || '').toLowerCase();
-    const quality = (movie.quality || '').toLowerCase();
-    const description = (movie.description || '').toLowerCase();
+    const quality = String(movie.quality || '').toLowerCase();
+    const description = String(movie.description || '').toLowerCase();
 
     const genres = Array.isArray(movie.genres) 
       ? movie.genres.map(g => String(g).toLowerCase()).join(' ') 

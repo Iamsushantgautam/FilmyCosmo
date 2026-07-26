@@ -23,9 +23,9 @@ export function isMovieInCategory(movie, categoryTarget) {
 
   const searchKeywords = config ? config.keywords : [targetLower];
 
-  const catStr = (movie.category || '').toLowerCase();
-  const titleStr = (movie.title || '').toLowerCase();
-  const langStr = (movie.language || '').toLowerCase();
+  const catStr = String(movie.category || '').toLowerCase();
+  const titleStr = String(movie.title || '').toLowerCase();
+  const langStr = String(movie.language || '').toLowerCase();
   const termsList = Array.isArray(movie.terms) ? movie.terms.map(t => String(t).toLowerCase()) : [];
   const tagsList = Array.isArray(movie.tags) ? movie.tags.map(t => String(t).toLowerCase()) : [];
   const genresList = Array.isArray(movie.genres) ? movie.genres.map(g => String(g).toLowerCase()) : [];
