@@ -1,4 +1,5 @@
 import categoriesData from '../categories.json';
+import sectionsData from '../sections.json';
 
 /**
  * Master Category Configuration Array loaded from src/categories.json
@@ -40,17 +41,46 @@ export function isMovieInCategory(movie, categoryTarget, options = {}) {
   }
 
   // Build complete set of target keywords to match against
-  const targetKeywords = new Set(rawTargets);
+  const targetKeywords = new Set();
 
-  // Check if any target corresponds to a defined MAIN_CATEGORIES config entry
   rawTargets.forEach(target => {
+    let foundSpecificKeywords = false;
+
+    // 1. Match against sections.json configurations
+    const sectionConfig = sectionsData.find(
+      s => s.id?.toLowerCase() === target ||
+           s.title?.toLowerCase() === target ||
+           (s.viewAllLink && s.viewAllLink.toLowerCase() === `/category/${target}`)
+    );
+    if (sectionConfig && sectionConfig.category) {
+      sectionConfig.category.split(',').forEach(kw => {
+        const clean = kw.trim().toLowerCase();
+        if (clean) {
+          targetKeywords.add(clean);
+          foundSpecificKeywords = true;
+        }
+      });
+    }
+
+    // 2. Match against MAIN_CATEGORIES config entry
     const config = MAIN_CATEGORIES.find(
       c => c.id.toLowerCase() === target ||
            c.name.toLowerCase() === target ||
            (Array.isArray(c.keywords) && c.keywords.some(k => k.toLowerCase() === target))
     );
-    if (config && Array.isArray(config.keywords)) {
-      config.keywords.forEach(kw => targetKeywords.add(kw.toLowerCase().trim()));
+    if (config && Array.isArray(config.keywords) && config.keywords.length > 0) {
+      config.keywords.forEach(kw => {
+        const clean = kw.trim().toLowerCase();
+        if (clean) {
+          targetKeywords.add(clean);
+          foundSpecificKeywords = true;
+        }
+      });
+    }
+
+    // 3. Fallback: only add target string if no explicit category keywords were found
+    if (!foundSpecificKeywords) {
+      targetKeywords.add(target);
     }
   });
 
@@ -69,33 +99,13 @@ export function isMovieInCategory(movie, categoryTarget, options = {}) {
     ? movie.genres.map(g => String(g).toLowerCase()) 
     : (typeof movie.genres === 'string' ? movie.genres.toLowerCase().split(/[,/|]+/) : []);
 
-  const fullSearchText = ` ${catStr} ${titleStr} ${seoTitleStr} ${slugStr} ${langStr} ${movieTypeStr} ${termsList.join(' ')} ${tagsList.join(' ')} ${genresList.join(' ')} ${descStr} `;
+  const starcastList = Array.isArray(movie.starcast) 
+    ? movie.starcast.map(s => String(s).toLowerCase().trim()) 
+    : (typeof movie.starcast === 'string' ? movie.starcast.toLowerCase().split(/[,/|]+/).map(s => s.trim()) : []);
 
-  // Special case for 'new' / 'newreleases' / 'recentlyadded'
-  if (rawTargets.includes('new') || rawTargets.includes('newreleases') || rawTargets.includes('recentlyadded')) {
-    if (movie.isRecent || movie.movieShow) return true;
-    const yearNum = parseInt(movie.releaseDate || movie.movie_year || movie.year || '0', 10);
-    if (yearNum >= 2024) return true;
-  }
+  const fullSearchText = ` ${catStr} ${titleStr} ${seoTitleStr} ${slugStr} ${langStr} ${movieTypeStr} ${termsList.join(' ')} ${tagsList.join(' ')} ${genresList.join(' ')} ${starcastList.join(' ')} ${descStr} `;
 
-  // Precise filtering for Bollywood (exclude explicit South/Hollywood unless Bollywood is tagged)
-  if (rawTargets.includes('bollywood')) {
-    const isExplicitBollywood = catStr.includes('bollywood') || 
-                                titleStr.includes('bollywood') || 
-                                termsList.some(t => t.includes('bollywood')) || 
-                                tagsList.some(t => t.includes('bollywood'));
-    if (isExplicitBollywood) return true;
-
-    const isSouthOrHollywood = catStr.includes('south') || 
-                               catStr.includes('hollywood') || 
-                               termsList.some(t => t.includes('south') || t.includes('hollywood') || t.includes('telugu') || t.includes('tamil') || t.includes('kannada') || t.includes('malayalam')) ||
-                               tagsList.some(t => t.includes('south') || t.includes('hollywood') || t.includes('telugu') || t.includes('tamil') || t.includes('kannada') || t.includes('malayalam'));
-    if (isSouthOrHollywood) return false;
-
-    return searchKeywords.some(kw => fullSearchText.includes(kw));
-  }
-
-  // General keyword matching against any SEO/tag/category/title field
+  // Strict keyword matching against the configured category keywords
   return searchKeywords.some(kw => fullSearchText.includes(kw));
 }
 

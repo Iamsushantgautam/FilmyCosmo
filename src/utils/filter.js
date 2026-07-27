@@ -157,11 +157,13 @@ export function filterMovies(movies, { category = 'All', genre = 'All', term = '
     if (term && term !== 'All') {
       const termLower = term.toLowerCase().trim();
       const termsList = Array.isArray(movie.terms) ? movie.terms.map(t => String(t).toLowerCase()) : [];
+      const starcastList = Array.isArray(movie.starcast) ? movie.starcast.map(s => String(s).toLowerCase()) : [];
       const title = String(movie.title || '').toLowerCase();
       const cat = String(movie.category || '').toLowerCase();
       const lang = String(movie.language || '').toLowerCase();
 
       const matchesTerm = termsList.some(t => t.includes(termLower)) ||
+                          starcastList.some(s => s.includes(termLower)) ||
                           title.includes(termLower) ||
                           cat.includes(termLower) ||
                           lang.includes(termLower);

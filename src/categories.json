@@ -25,6 +25,14 @@
     ]
   },
   {
+    "id": "Adult",
+    "name": "18+ Only",
+    "keywords": [
+      "nudity",
+      "nudity-b"
+    ]
+  },
+  {
     "id": "WebSeries",
     "name": "Web Series",
     "keywords": [
@@ -33,7 +41,9 @@
       "tv show",
       "tvshow",
       "season",
-      "series"
+      "series",
+      "s01",
+      "s02"
     ]
   },
   {
@@ -41,21 +51,7 @@
     "name": "Marvel",
     "keywords": [
       "marvel",
-      "avengers",
-      "mcu",
-      "superhero",
-      "iron man",
-      "thor"
-    ]
-  },
-  {
-    "id": "SpiderMan",
-    "name": "Spider-Man",
-    "keywords": [
-      "spider-man",
-      "spiderman",
-      "peter parker",
-      "spider man"
+      "mcu"
     ]
   },
   {

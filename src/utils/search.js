@@ -49,7 +49,11 @@ export function searchMovies(movies, query) {
       ? movie.tags.map(tg => String(tg).toLowerCase()).join(' ') 
       : '';
 
-    const searchableText = `${title} ${category} ${genres} ${language} ${year} ${quality} ${terms} ${tags} ${description}`;
+    const starcast = Array.isArray(movie.starcast) 
+      ? movie.starcast.map(s => String(s).toLowerCase()).join(' ') 
+      : (typeof movie.starcast === 'string' ? String(movie.starcast).toLowerCase() : '');
+
+    const searchableText = `${title} ${category} ${genres} ${language} ${year} ${quality} ${terms} ${tags} ${starcast} ${description}`;
 
     // Exact or substring match priority
     if (searchableText.includes(cleanQuery)) {

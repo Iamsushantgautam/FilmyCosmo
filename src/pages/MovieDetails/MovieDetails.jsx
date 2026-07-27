@@ -4,6 +4,7 @@ import { useMovieContext } from '../../context/MovieContext';
 import { QualityBadge, RatingBadge, CategoryBadge, LanguageBadge } from '../../components/Badges/Badges';
 import DownloadGroup from '../../components/DownloadGroup/DownloadGroup';
 import RelatedMovies from '../../components/RelatedMovies/RelatedMovies';
+import DownloadSection from '../../components/DownloadSection/DownloadSection';
 import { createSlug } from '../../utils/helpers';
 import styles from './MovieDetails.module.css';
 
@@ -213,9 +214,8 @@ export default function MovieDetails() {
           <div className={styles.screenshotsSection}>
             <div className={styles.sectionHeaderCentered}>
               <h2 className={styles.sectionHeadingCentered}>
-                <span>Movie Screenshots</span>
+                <span> Screenshots</span>
               </h2>
-              <p className={styles.sectionSubCentered}>High quality scene previews from {movie.title}</p>
             </div>
 
             <div className={styles.screenshotsGridCentered}>
@@ -238,27 +238,7 @@ export default function MovieDetails() {
         )}
 
         {/* Download Options Section */}
-        <div id="download-section" style={{ marginTop: screenshotsList.length > 0 ? '50px' : '0' }}>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionHeading}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent-red)" strokeWidth="2.5" style={{ display: 'inline-block', verticalAlign: 'middle', marginRight: '8px' }}>
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              <span>Download Options</span>
-            </h2>
-            <p className={styles.sectionSub}>Select your preferred quality and resolution link below</p>
-          </div>
-
-          {movie.downloads && movie.downloads.length > 0 ? (
-            <DownloadGroup downloads={movie.downloads} movieId={movie.id} />
-          ) : (
-            <div className={styles.noDownloadsBox}>
-              <p>No direct download links listed for this entry currently.</p>
-            </div>
-          )}
-        </div>
+        <DownloadSection movie={movie} hasScreenshots={screenshotsList.length > 0} />
 
         {/* Priority Related Movies */}
         <div style={{ marginTop: '50px' }}>

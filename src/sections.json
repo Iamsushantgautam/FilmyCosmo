@@ -45,8 +45,16 @@
     "id": "south",
     "title": "South Movies",
     "type": "category",
-    "category": "South",
+    "category": "South, telugu, tamil, kannada, malayalam",
     "viewAllLink": "/category/South",
+    "limit": 50
+  },
+  {
+    "id": "Adult",
+    "title": "18+ Only",
+    "type": "category",
+    "category": "nudity , nudity-b",
+    "viewAllLink": "/category/Adult",
     "limit": 50
   },
   {
@@ -58,10 +66,10 @@
     "limit": 50
   },
   {
-    "id": "spiderman",
+    "id": "SpiderMan",
     "title": "Spider-Man Collection",
     "type": "category",
-    "category": "SpiderMan",
+    "category": "Spider-Man",
     "viewAllLink": "/category/SpiderMan",
     "limit": 50
   },
@@ -69,7 +77,7 @@
     "id": "webseries",
     "title": "Web Series & TV Shows",
     "type": "category",
-    "category": "WebSeries",
+    "category": "WebSeries, web series, tv show, series",
     "viewAllLink": "/category/WebSeries",
     "limit": 50
   },
@@ -77,7 +85,7 @@
     "id": "animation",
     "title": "Animation & Anime",
     "type": "category",
-    "category": "Animation,animated,cartoon,anime",
+    "category": "Animation, animated, cartoon, anime",
     "viewAllLink": "/category/Animation",
     "limit": 50
   }

@@ -1,0 +1,410 @@
+/* ============================================================
+   DownloadSection.module.css
+   Styles for Download Options section — supports both normal
+   (quality-grouped) and web-series (episode accordion) modes.
+   ============================================================ */
+
+/* Outer wrapper */
+.wrapper {
+  width: 100%;
+}
+
+/* ----------------------------------------------------------
+   Section Header
+   ---------------------------------------------------------- */
+.sectionHeader {
+  margin-bottom: 24px;
+}
+
+.sectionHeading {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #ffffff;
+  margin: 0 0 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.headingIcon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+/* "Web Series" badge next to heading */
+.seriesBadge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #0dcaf0;
+  background: rgba(13, 202, 240, 0.12);
+  border: 1px solid rgba(13, 202, 240, 0.3);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.sectionSub {
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ----------------------------------------------------------
+   Empty / No-downloads fallback
+   ---------------------------------------------------------- */
+.noDownloadsBox {
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* ----------------------------------------------------------
+   Episode Accordion Container
+   ---------------------------------------------------------- */
+.episodeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Individual Episode Block */
+.episodeBlock {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.episodeBlockOpen {
+  border-color: rgba(229, 9, 20, 0.35);
+  box-shadow: 0 4px 20px rgba(229, 9, 20, 0.1);
+}
+
+/* Episode Accordion Toggle Button */
+.episodeHeader {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.18s ease;
+  gap: 12px;
+}
+
+.episodeBlock:not(.episodeBlockOpen) .episodeHeader:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.episodeBlockOpen .episodeHeader {
+  background: rgba(229, 9, 20, 0.08);
+  border-bottom: 1px solid rgba(229, 9, 20, 0.2);
+}
+
+.episodeHeaderLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* "EP 01" pill badge */
+.episodeBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 52px;
+  padding: 4px 10px;
+  background: var(--accent-red);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.episodeLabel {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.episodeLinkCount {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.07);
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+/* Chevron arrow */
+.episodeChevron {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  transition: transform 0.22s ease;
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+  color: var(--accent-red);
+}
+
+/* ----------------------------------------------------------
+   Episode Body (expanded content)
+   ---------------------------------------------------------- */
+.episodeBody {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: slideDown 0.22s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ----------------------------------------------------------
+   Quality Group inside an Episode
+   ---------------------------------------------------------- */
+.qualityGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.qualityHeader {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 8px;
+}
+
+.qualityTitle {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--accent-red);
+  margin: 0;
+  letter-spacing: 0.3px;
+}
+
+/* ----------------------------------------------------------
+   Links grid (reused from DownloadGroup style)
+   ---------------------------------------------------------- */
+.linksList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.downloadBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.downloadBtn:hover {
+  background: var(--accent-red);
+  color: #ffffff;
+  border-color: var(--accent-red);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
+}
+
+.providerInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.serverNameLabel {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #ffffff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Icon circles */
+.iconShortLink {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(255, 193, 7, 0.2); color: #ffc107; flex-shrink: 0;
+}
+.iconCustomLink {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(13, 202, 240, 0.2); color: #0dcaf0; flex-shrink: 0;
+}
+.iconDirectLink {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(40, 167, 69, 0.2); color: #2ecc71; flex-shrink: 0;
+}
+
+.downloadBtn:hover .iconShortLink,
+.downloadBtn:hover .iconCustomLink,
+.downloadBtn:hover .iconDirectLink {
+  background: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.rightInfo {
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+
+.clickBadge {
+  font-size: 0.74rem; font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.1);
+  padding: 2px 7px; border-radius: 10px;
+}
+
+.fileSize {
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 3px 8px; border-radius: 12px;
+}
+
+.downloadBtn:hover .fileSize,
+.downloadBtn:hover .clickBadge {
+  color: #ffffff;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* ----------------------------------------------------------
+   Responsive
+   ---------------------------------------------------------- */
+
+/* Fluid grid: auto-fit as many columns as fit, minimum 220px each */
+.linksList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(220px, 100%), 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .linksList {
+    grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+    gap: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .episodeHeader {
+    padding: 11px 14px;
+    gap: 8px;
+  }
+  .episodeLabel {
+    font-size: 0.88rem;
+  }
+  .episodeLinkCount {
+    font-size: 0.72rem;
+    padding: 2px 6px;
+  }
+  .episodeBody {
+    padding: 12px;
+    gap: 16px;
+  }
+  /* Single column on phones */
+  .linksList {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+  .downloadBtn {
+    padding: 11px 13px;
+    font-size: 0.88rem;
+    border-radius: 10px;
+  }
+  .serverNameLabel {
+    font-size: 0.86rem;
+  }
+  .fileSize {
+    font-size: 0.74rem;
+    padding: 2px 7px;
+  }
+  .clickBadge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .sectionHeading {
+    font-size: 1.3rem;
+    gap: 8px;
+  }
+  .sectionSub {
+    font-size: 0.82rem;
+  }
+  .episodeHeader {
+    padding: 10px 12px;
+  }
+  .episodeLabel {
+    font-size: 0.82rem;
+  }
+  .episodeBody {
+    padding: 10px;
+    gap: 14px;
+  }
+  .downloadBtn {
+    padding: 10px 11px;
+    font-size: 0.84rem;
+  }
+  .serverNameLabel {
+    font-size: 0.82rem;
+  }
+  .iconShortLink,
+  .iconCustomLink,
+  .iconDirectLink {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+@media (max-width: 360px) {
+  .episodeHeader {
+    padding: 9px 10px;
+  }
+  .episodeLabel {
+    font-size: 0.78rem;
+  }
+  .episodeBody {
+    padding: 8px;
+  }
+  .downloadBtn {
+    padding: 9px 10px;
+    font-size: 0.8rem;
+    gap: 6px;
+  }
+  .fileSize {
+    font-size: 0.7rem;
+    padding: 2px 5px;
+  }
+}
