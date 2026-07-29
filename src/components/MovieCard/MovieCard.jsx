@@ -12,7 +12,7 @@ function MovieCardComponent({ movie, isTrending = false, rank }) {
 
   if (!movie) return null;
 
-  const saved = isMovieSaved(movie.id);
+  const saved = isMovieSaved(movie);
 
   const handleClick = () => {
     navigate(`/movie/${getMovieSlug(movie)}`);

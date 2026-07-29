@@ -4,7 +4,7 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 60000,
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -172,44 +172,34 @@ export function normalizeMovie(item, index) {
   };
 }
 
-// High-performance In-Memory API Cache with SessionStorage Sync
+// High-performance In-Memory API Cache (Movie catalog is in-memory only)
 const memoryCache = new Map();
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes cache TTL
 
-const LOCAL_STORAGE_MOVIES_KEY = 'filmycosmo_persistent_movies_v4';
-
 /**
- * Get stored movies directly from localStorage synchronously for 0ms initial load
+ * Clean up legacy movie catalog storage items and return empty array
  */
 export function getStoredMovies() {
   try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_MOVIES_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
-      }
-    }
+    localStorage.removeItem('filmycosmo_persistent_movies_v4');
+    localStorage.removeItem('filmycosmo_persistent_movies');
+    localStorage.removeItem('filmycosmo_persistent_movies_v3');
+    sessionStorage.removeItem('filmycosmo_session_movies_v5');
   } catch (e) {
-    console.warn('Failed reading persistent movies from localStorage:', e);
+    // Ignore storage cleanup errors
   }
   return [];
 }
 
 /**
- * Persist normalized movies to localStorage
+ * No-op function: Movie catalog is not stored in localStorage
  */
 export function setStoredMovies(movies) {
-  if (!Array.isArray(movies) || movies.length === 0) return;
-  try {
-    localStorage.setItem(LOCAL_STORAGE_MOVIES_KEY, JSON.stringify(movies));
-  } catch (e) {
-    console.warn('Failed saving persistent movies to localStorage:', e);
-  }
+  // Movie catalog is in-memory only
 }
 
 /**
- * Get item from cache (Memory first, SessionStorage fallback)
+ * Get item from in-memory cache
  */
 function getCachedData(key) {
   if (memoryCache.has(key)) {
@@ -218,37 +208,15 @@ function getCachedData(key) {
       return entry.data;
     }
   }
-
-  try {
-    const sessionData = sessionStorage.getItem(`filmycosmo_cache_v6_${key}`);
-    if (sessionData) {
-      const parsed = JSON.parse(sessionData);
-      if (Date.now() - parsed.timestamp < CACHE_TTL_MS) {
-        memoryCache.set(key, parsed);
-        return parsed.data;
-      }
-    }
-  } catch (e) {
-    // Ignore storage quota errors
-  }
-
   return null;
 }
 
 /**
- * Set item in cache
+ * Set item in in-memory cache
  */
 function setCachedData(key, data) {
   const entry = { data, timestamp: Date.now() };
   memoryCache.set(key, entry);
-  if (key.includes('all_movies')) {
-    setStoredMovies(data);
-  }
-  try {
-    sessionStorage.setItem(`filmycosmo_cache_v6_${key}`, JSON.stringify(entry));
-  } catch (e) {
-    // Ignore quota full
-  }
 }
 
 /**
@@ -352,6 +320,8 @@ export async function fetchMoviesProgressively({ onProgress, onComplete, limit =
     }
 
     const page1Normalized = page1Raw.map((item, idx) => normalizeMovie(item, idx)).filter(Boolean);
+
+    setCachedData(cacheKey, page1Normalized);
 
     if (onProgress) {
       onProgress(page1Normalized);

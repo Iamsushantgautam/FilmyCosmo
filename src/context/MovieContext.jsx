@@ -5,13 +5,22 @@ import { searchMovies } from '../utils/search';
 
 const MovieContext = createContext(null);
 
+// Helper to keep ONLY title & rendering fields in localStorage (id and all heavy API fields removed)
+function sanitizeSavedMovie(movie) {
+  if (!movie || typeof movie !== 'object') return null;
+  const title = movie.title || '';
+  if (!title) return null;
+  return {
+    title,
+    slug: movie.slug || '',
+    poster: movie.poster || '',
+    releaseDate: movie.releaseDate || ''
+  };
+}
+
 export function MovieProvider({ children }) {
-  // Initialize movies synchronously from localStorage so site loads in 0ms on refresh!
-  const [movies, setMovies] = useState(() => getStoredMovies());
-  const [loading, setLoading] = useState(() => {
-    const initial = getStoredMovies();
-    return initial.length === 0;
-  });
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
 
@@ -22,9 +31,8 @@ export function MovieProvider({ children }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
-  // Background Stale-While-Revalidate Data Synchronizer
+  // Background Data Synchronizer
   const loadMoviesData = useCallback(async (isSilent = false) => {
-    // Only show full loading spinner if we have ZERO stored movies
     if (!isSilent && movies.length === 0) {
       setLoading(true);
     }
@@ -35,13 +43,10 @@ export function MovieProvider({ children }) {
         onProgress: (page1Movies) => {
           setMovies(prev => {
             if (!prev || prev.length === 0) return page1Movies;
-            // Smoothly merge any new movies from page 1 without screen reload
             const existingIds = new Set(prev.map(m => m.id));
             const newItems = page1Movies.filter(m => !existingIds.has(m.id));
             if (newItems.length > 0) {
-              const updated = [...newItems, ...prev];
-              setStoredMovies(updated);
-              return updated;
+              return [...newItems, ...prev];
             }
             return prev;
           });
@@ -49,9 +54,7 @@ export function MovieProvider({ children }) {
         },
         onComplete: (allMovies) => {
           setMovies(prev => {
-            // Check if dataset has updated or new movies added
             if (!prev || prev.length === 0 || prev.length !== allMovies.length) {
-              setStoredMovies(allMovies);
               return allMovies;
             }
             return prev;
@@ -74,11 +77,10 @@ export function MovieProvider({ children }) {
   useEffect(() => {
     let controller = new AbortController();
     
-    // Immediate background revalidation (0ms load from localStorage + background update)
     loadMoviesData(movies.length > 0);
 
     const interval = setInterval(() => {
-      loadMoviesData(true); // Silent sync without page refresh or loading spinner
+      loadMoviesData(true);
     }, 45000);
 
     return () => {
@@ -96,7 +98,6 @@ export function MovieProvider({ children }) {
   const trendingMovies = useMemo(() => {
     const explicit = movies.filter(m => m.isTrending);
     if (explicit.length >= 10) return explicit;
-    // Fallback to top 10 movies sorted by views or catalog order
     const sorted = [...movies].sort((a, b) => (b.views || 0) - (a.views || 0));
     return sorted.slice(0, 10);
   }, [movies]);
@@ -132,11 +133,17 @@ export function MovieProvider({ children }) {
     setSearchQuery('');
   }, []);
 
-  // LocalStorage Saved Movies State
+  // LocalStorage Saved Movies State (NO id or downloads array stored)
   const [savedMovies, setSavedMovies] = useState(() => {
     try {
       const stored = localStorage.getItem('filmycosmo_saved_movies');
-      return stored ? JSON.parse(stored) : [];
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) {
+          return parsed.map(sanitizeSavedMovie).filter(Boolean);
+        }
+      }
+      return [];
     } catch {
       return [];
     }
@@ -144,24 +151,43 @@ export function MovieProvider({ children }) {
 
   useEffect(() => {
     try {
-      localStorage.setItem('filmycosmo_saved_movies', JSON.stringify(savedMovies));
+      const sanitized = savedMovies.map(sanitizeSavedMovie).filter(Boolean);
+      localStorage.setItem('filmycosmo_saved_movies', JSON.stringify(sanitized));
     } catch (e) {
       console.error('Error saving watchlist to localStorage:', e);
     }
   }, [savedMovies]);
 
-  const isMovieSaved = useCallback((movieId) => {
-    return savedMovies.some(m => String(m.id) === String(movieId));
+  const isMovieSaved = useCallback((movieIdOrSlug) => {
+    if (!movieIdOrSlug) return false;
+    const target = String(typeof movieIdOrSlug === 'object' ? (movieIdOrSlug.slug || movieIdOrSlug.title || movieIdOrSlug.id) : movieIdOrSlug).toLowerCase();
+    return savedMovies.some(m => {
+      if (m.slug && String(m.slug).toLowerCase() === target) return true;
+      if (m.title && String(m.title).toLowerCase() === target) return true;
+      return false;
+    });
   }, [savedMovies]);
 
   const toggleSaveMovie = useCallback((movie) => {
-    if (!movie || !movie.id) return;
+    if (!movie || (!movie.title && !movie.slug && !movie.id)) return;
+    const cleanMovie = sanitizeSavedMovie(movie);
+    if (!cleanMovie) return;
+
     setSavedMovies(prev => {
-      const exists = prev.some(m => String(m.id) === String(movie.id));
+      const exists = prev.some(m => {
+        if (cleanMovie.slug && m.slug && String(m.slug).toLowerCase() === String(cleanMovie.slug).toLowerCase()) return true;
+        if (cleanMovie.title && m.title && String(m.title).toLowerCase() === String(cleanMovie.title).toLowerCase()) return true;
+        return false;
+      });
+
       if (exists) {
-        return prev.filter(m => String(m.id) !== String(movie.id));
+        return prev.filter(m => {
+          if (cleanMovie.slug && m.slug && String(m.slug).toLowerCase() === String(cleanMovie.slug).toLowerCase()) return false;
+          if (cleanMovie.title && m.title && String(m.title).toLowerCase() === String(cleanMovie.title).toLowerCase()) return false;
+          return true;
+        });
       } else {
-        return [movie, ...prev];
+        return [cleanMovie, ...prev];
       }
     });
   }, []);

@@ -1,50 +1,38 @@
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { MovieProvider } from './context/MovieContext';
 import Layout from './components/Layout/Layout';
-import { HeroSkeleton, GridSkeleton } from './components/Skeleton/Skeleton';
 
-const Home = lazy(() => import('./pages/Home/Home'));
-const Movies = lazy(() => import('./pages/Movies/Movies'));
-const MovieDetails = lazy(() => import('./pages/MovieDetails/MovieDetails'));
-const Category = lazy(() => import('./pages/Category/Category'));
-const MyList = lazy(() => import('./pages/MyList/MyList'));
-const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy/PrivacyPolicy'));
-const TermsOfService = lazy(() => import('./pages/TermsOfService/TermsOfService'));
-const DMCA = lazy(() => import('./pages/DMCA/DMCA'));
-const ContactUs = lazy(() => import('./pages/ContactUs/ContactUs'));
+import Home from './pages/Home/Home';
+import Movies from './pages/Movies/Movies';
+import MovieDetails from './pages/MovieDetails/MovieDetails';
+import Category from './pages/Category/Category';
+import MyList from './pages/MyList/MyList';
+import PrivacyPolicy from './pages/PrivacyPolicy/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService/TermsOfService';
+import DMCA from './pages/DMCA/DMCA';
+import ContactUs from './pages/ContactUs/ContactUs';
 
 export default function App() {
   return (
     <MovieProvider>
       <Router>
         <Layout>
-          <Suspense fallback={<PageFallback />}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/movies" element={<Movies />} />
-              <Route path="/category" element={<Category />} />
-              <Route path="/category/:name" element={<Category />} />
-              <Route path="/movie/:id" element={<MovieDetails />} />
-              <Route path="/my-list" element={<MyList />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/terms-of-service" element={<TermsOfService />} />
-              <Route path="/dmca" element={<DMCA />} />
-              <Route path="/contact" element={<ContactUs />} />
-              <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
-          </Suspense>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/movies" element={<Movies />} />
+            <Route path="/category" element={<Category />} />
+            <Route path="/category/:name" element={<Category />} />
+            <Route path="/movie/:id" element={<MovieDetails />} />
+            <Route path="/my-list" element={<MyList />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/dmca" element={<DMCA />} />
+            <Route path="/contact" element={<ContactUs />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </Layout>
       </Router>
     </MovieProvider>
-  );
-}
-
-function PageFallback() {
-  return (
-    <div className="page-section">
-      <HeroSkeleton />
-      <GridSkeleton count={12} />
-    </div>
   );
 }
