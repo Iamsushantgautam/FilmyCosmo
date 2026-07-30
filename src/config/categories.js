@@ -6,9 +6,20 @@ import sectionsData from '../sections.json';
  */
 export const MAIN_CATEGORIES = categoriesData;
 
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function matchesFullWord(text, kw) {
+  if (!text || !kw) return false;
+  const pattern = new RegExp(`(?:^|[^a-zA-Z0-9_])${escapeRegExp(kw)}(?:$|[^a-zA-Z0-9_])`, 'i');
+  return pattern.test(text);
+}
+
 /**
  * Helper to test if a movie belongs to a category by checking keywords
- * across Category, Title, SEO Title, Slug, Terms, Tags, Genres, Movie Type, Description, and Language fields.
+ * across Category, Title, SEO Title, Slug, Terms, Tags, Genres, Movie Type, and Language fields.
+ * Note: Movie description is explicitly excluded from category filtering to prevent false matches.
  */
 export function isMovieInCategory(movie, categoryTarget, options = {}) {
   if (!movie || !categoryTarget || categoryTarget === 'All') return true;
@@ -32,11 +43,11 @@ export function isMovieInCategory(movie, categoryTarget, options = {}) {
     ? movie.tags.map(t => String(t).toLowerCase().trim()) 
     : (typeof movie.tags === 'string' ? movie.tags.toLowerCase().split(/[,/|]+/).map(t => t.trim()) : []);
 
-  // Strict Tag-Only Matching Mode for Special Sections
+  // Strict Tag-Only Matching Mode for Special Sections using full word boundary
   if (isTagOnly) {
     const movieTagsAndTerms = [...tagsList, ...termsList];
     return rawTargets.some(targetKw => 
-      movieTagsAndTerms.some(tag => tag === targetKw || tag.includes(targetKw))
+      movieTagsAndTerms.some(tag => matchesFullWord(tag, targetKw))
     );
   }
 
@@ -86,14 +97,13 @@ export function isMovieInCategory(movie, categoryTarget, options = {}) {
 
   const searchKeywords = Array.from(targetKeywords).filter(Boolean);
 
-  // Extract all searchable text from movie object including tags, terms, and SEO fields
+  // Extract searchable text from movie object (EXCLUDING description to prevent false category matches)
   const catStr = String(movie.category || '').toLowerCase();
   const titleStr = String(movie.title || '').toLowerCase();
   const seoTitleStr = String(movie.seo_title || '').toLowerCase();
   const slugStr = String(movie.slug || movie.seo_slug || '').toLowerCase();
   const langStr = String(movie.language || '').toLowerCase();
   const movieTypeStr = String(movie.movieType || movie.type || '').toLowerCase();
-  const descStr = String(movie.description || '').toLowerCase();
 
   const genresList = Array.isArray(movie.genres) 
     ? movie.genres.map(g => String(g).toLowerCase()) 
@@ -103,9 +113,15 @@ export function isMovieInCategory(movie, categoryTarget, options = {}) {
     ? movie.starcast.map(s => String(s).toLowerCase().trim()) 
     : (typeof movie.starcast === 'string' ? movie.starcast.toLowerCase().split(/[,/|]+/).map(s => s.trim()) : []);
 
-  const fullSearchText = ` ${catStr} ${titleStr} ${seoTitleStr} ${slugStr} ${langStr} ${movieTypeStr} ${termsList.join(' ')} ${tagsList.join(' ')} ${genresList.join(' ')} ${starcastList.join(' ')} ${descStr} `;
+  // General searchable text (EXCLUDING description and starcast)
+  const fullSearchText = ` ${catStr} ${titleStr} ${seoTitleStr} ${slugStr} ${langStr} ${movieTypeStr} ${termsList.join(' ')} ${tagsList.join(' ')} ${genresList.join(' ')} `;
 
-  // Strict keyword matching against the configured category keywords
-  return searchKeywords.some(kw => fullSearchText.includes(kw));
+  // Full word boundary keyword matching for general fields, and exact full-name match for starcast
+  // (Prevents cast member names like "Elizabeth Marvel" from falsely triggering the "Marvel" category)
+  return searchKeywords.some(kw => {
+    if (matchesFullWord(fullSearchText, kw)) return true;
+    if (starcastList.some(actor => actor === kw)) return true;
+    return false;
+  });
 }
 

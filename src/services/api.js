@@ -184,6 +184,8 @@ export function getStoredMovies() {
     localStorage.removeItem('filmycosmo_persistent_movies_v4');
     localStorage.removeItem('filmycosmo_persistent_movies');
     localStorage.removeItem('filmycosmo_persistent_movies_v3');
+    localStorage.removeItem('filmycosmo_movies_cache');
+    localStorage.removeItem('filmycosmo_movies_cache_time');
     sessionStorage.removeItem('filmycosmo_session_movies_v5');
   } catch (e) {
     // Ignore storage cleanup errors
@@ -192,10 +194,10 @@ export function getStoredMovies() {
 }
 
 /**
- * No-op function: Movie catalog is not stored in localStorage
+ * No-op function: Movies are not stored in localStorage
  */
 export function setStoredMovies(movies) {
-  // Movie catalog is in-memory only
+  // Movies are stored in memory only
 }
 
 /**
@@ -211,12 +213,15 @@ function getCachedData(key) {
   return null;
 }
 
-/**
- * Set item in in-memory cache
- */
 function setCachedData(key, data) {
-  const entry = { data, timestamp: Date.now() };
+  const prevEntry = memoryCache.get(key);
+  let finalData = data;
+  if (prevEntry && Array.isArray(prevEntry.data) && Array.isArray(data)) {
+    finalData = diffAndMergeMovies(prevEntry.data, data);
+  }
+  const entry = { data: finalData, timestamp: Date.now() };
   memoryCache.set(key, entry);
+  return finalData;
 }
 
 /**
@@ -453,6 +458,38 @@ export async function fetchAllMoviesPaginated(limit = 30, signal) {
     }
     throw error;
   }
+}
+
+export function diffAndMergeMovies(prevMovies, newMovies) {
+  if (!Array.isArray(prevMovies) || prevMovies.length === 0) return newMovies;
+  if (!Array.isArray(newMovies) || newMovies.length === 0) return [];
+
+  const prevMap = new Map(prevMovies.map(m => [m.id, m]));
+
+  return newMovies.map(newMovie => {
+    const prevMovie = prevMap.get(newMovie.id);
+    if (!prevMovie) return newMovie;
+
+    // Compare key fields to check for changes
+    const isEquivalent =
+      prevMovie.title === newMovie.title &&
+      prevMovie.slug === newMovie.slug &&
+      prevMovie.poster === newMovie.poster &&
+      prevMovie.rating === newMovie.rating &&
+      prevMovie.views === newMovie.views &&
+      prevMovie.releaseDate === newMovie.releaseDate &&
+      JSON.stringify(prevMovie.downloads) === JSON.stringify(newMovie.downloads);
+
+    if (isEquivalent) {
+      return prevMovie;
+    }
+
+    return { ...prevMovie, ...newMovie };
+  });
+}
+
+export async function fetchAllMovies(signal) {
+  return fetchAllMoviesPaginated(30, signal);
 }
 
 export async function trackDownloadClick(movieId, linkId, linkObj) {

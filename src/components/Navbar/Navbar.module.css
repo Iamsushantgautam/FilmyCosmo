@@ -11,6 +11,23 @@
   transition: background var(--transition-normal), box-shadow var(--transition-normal);
 }
 
+.refreshProgressBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: linear-gradient(90deg, transparent, var(--accent-red), transparent);
+  background-size: 200% 100%;
+  animation: pulseBar 1.5s infinite linear;
+  z-index: 1100;
+}
+
+@keyframes pulseBar {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
 .scrolled {
   background: rgba(8, 8, 10, 0.98);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);

@@ -8,7 +8,7 @@ import { GridSkeleton } from '../../components/Skeleton/Skeleton';
 import styles from './Movies.module.css';
 
 export default function Movies() {
-  const { filteredMovies, loading, searchQuery, setSearchQuery, resetFilters } = useMovieContext();
+  const { filteredMovies, loading, searchQuery, setSearchQuery, resetFilters, selectedCategory, selectedGenre, selectedTerm } = useMovieContext();
   const [searchParams, setSearchParams] = useSearchParams();
 
   // Sync searchQuery from URL parameter if present on mount e.g. /movies?q=avatar
@@ -26,7 +26,7 @@ export default function Movies() {
     totalItems,
     pageSize,
     goToPage
-  } = usePagination(filteredMovies, 30);
+  } = usePagination(filteredMovies, 30, `${selectedCategory}_${selectedGenre}_${selectedTerm}_${searchQuery}`);
 
   // Sync page state with URL search param e.g. ?page=2
   useEffect(() => {

@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { MovieProvider } from './context/MovieContext';
 import Layout from './components/Layout/Layout';
+import ScrollToTop from './components/ScrollToTop/ScrollToTop';
 
 import Home from './pages/Home/Home';
 import Movies from './pages/Movies/Movies';
@@ -17,6 +18,7 @@ export default function App() {
   return (
     <MovieProvider>
       <Router>
+        <ScrollToTop />
         <Layout>
           <Routes>
             <Route path="/" element={<Home />} />

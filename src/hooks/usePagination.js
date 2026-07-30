@@ -1,14 +1,14 @@
 import { useState, useMemo, useEffect } from 'react';
 import { getPaginatedData } from '../utils/pagination';
 
-export function usePagination(items = [], initialPageSize = 30) {
+export function usePagination(items = [], initialPageSize = 30, filterKey = '') {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
 
-  // Reset to page 1 whenever items length changes (e.g., when filters change)
+  // Reset to page 1 only when the filter selection changes (not on background data updates)
   useEffect(() => {
     setCurrentPage(1);
-  }, [items.length]);
+  }, [filterKey]);
 
   const paginatedResult = useMemo(() => {
     return getPaginatedData(items, currentPage, pageSize);

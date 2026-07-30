@@ -18,7 +18,10 @@ export default function Category() {
     filteredMovies,
     loading,
     selectedCategory,
-    setSelectedCategory
+    setSelectedCategory,
+    selectedGenre,
+    selectedTerm,
+    searchQuery
   } = useMovieContext();
 
   // Sync route param (e.g. /category/Bollywood) with selectedCategory state
@@ -45,7 +48,7 @@ export default function Category() {
     totalItems,
     pageSize,
     goToPage
-  } = usePagination(filteredMovies, 30);
+  } = usePagination(filteredMovies, 30, `${selectedCategory}_${selectedGenre}_${selectedTerm}_${searchQuery}`);
 
   // Sync page state with URL query param ?page=2
   useEffect(() => {

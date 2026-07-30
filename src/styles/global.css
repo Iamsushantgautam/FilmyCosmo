@@ -71,3 +71,52 @@ img {
 .animate-fade-in {
   animation: fadeIn var(--transition-normal) forwards;
 }
+
+/* Premium Top Loading Progress Bar */
+.top-loading-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: linear-gradient(90deg, transparent, var(--accent-red, #E50914), transparent);
+  z-index: 9999;
+  animation: topLoadingBar 1.5s infinite linear;
+  background-size: 200% 100%;
+}
+
+@keyframes topLoadingBar {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Sticky Offline/Cache Warning Banner */
+.offline-warning-banner {
+  position: sticky;
+  top: var(--navbar-height, 64px);
+  left: 0;
+  right: 0;
+  background-color: rgba(229, 9, 20, 0.95);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  padding: 10px var(--spacing-xl, 40px);
+  text-align: center;
+  z-index: 990;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+  animation: slideDownBanner 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideDownBanner {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

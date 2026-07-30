@@ -9,7 +9,7 @@ import styles from './Navbar.module.css';
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { searchQuery, setSearchQuery, savedMovies, filteredMovies } = useMovieContext();
+  const { searchQuery, setSearchQuery, savedMovies, filteredMovies, isRefreshing } = useMovieContext();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchExpanded, setSearchExpanded] = useState(false);
@@ -118,6 +118,7 @@ export default function Navbar() {
 
   return (
     <header className={`${styles.navbarHeader} ${isScrolled ? styles.scrolled : ''}`}>
+      {isRefreshing && <div className={styles.refreshProgressBar} title="Refreshing catalog..." />}
       <div className={styles.navbarInner}>
         {/* Left Section: Brand Logo + Inline Nav Items */}
         <div className={styles.leftSection}>

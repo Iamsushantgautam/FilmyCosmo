@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
-import { fetchMovies, fetchMoviesProgressively, getStoredMovies, setStoredMovies, preloadPosters } from '../services/api';
+import { fetchMovies, fetchMoviesProgressively, getStoredMovies, setStoredMovies, preloadPosters, fetchAllMovies } from '../services/api';
 import { extractCategories, extractGenres, extractTerms, filterMovies } from '../utils/filter';
 import { searchMovies } from '../utils/search';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 
 const MovieContext = createContext(null);
 
-// Helper to keep ONLY title & rendering fields in localStorage (id and all heavy API fields removed)
+// Helper to keep ONLY title & rendering fields in memory (no persistent storage)
+// Helper to keep ONLY lightweight fields in localStorage (id and poster are excluded)
 function sanitizeSavedMovie(movie) {
   if (!movie || typeof movie !== 'object') return null;
   const title = movie.title || '';
@@ -13,16 +15,79 @@ function sanitizeSavedMovie(movie) {
   return {
     title,
     slug: movie.slug || '',
-    poster: movie.poster || '',
     releaseDate: movie.releaseDate || ''
   };
 }
 
 export function MovieProvider({ children }) {
-  const [movies, setMovies] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [dismissError, setDismissError] = useState(false);
+  
+  // React Query query for movies (in-memory caching via React Query memory cache only)
+  const { 
+    data: movies = [], 
+    error: queryError, 
+    isFetching,
+    isLoading,
+    refetch 
+  } = useQuery({
+    queryKey: ['movies'],
+    queryFn: ({ signal }) => fetchMoviesProgressively({ signal }),
+    staleTime: 300000,
+    gcTime: 1800000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+    refetchOnMount: false,
+    placeholderData: keepPreviousData,
+    refetchInterval: 45000, // Silent Background Polling for New API Movies (Every 45 seconds)
+  });
+
+  const loading = isLoading && movies.length === 0;
+  const isRefreshing = isFetching && movies.length > 0;
+  const error = queryError ? (queryError.message || 'Failed to connect to FilmyCosmo API') : null;
+  
   const [lastUpdated, setLastUpdated] = useState(null);
+
+  // Clean up any legacy movie catalog storage items on mount (preserving saved movies in localStorage)
+  useEffect(() => {
+    try {
+      localStorage.removeItem('filmycosmo_movies_cache');
+      localStorage.removeItem('filmycosmo_movies_cache_time');
+      localStorage.removeItem('filmycosmo_persistent_movies');
+      localStorage.removeItem('filmycosmo_persistent_movies_v3');
+      localStorage.removeItem('filmycosmo_persistent_movies_v4');
+      sessionStorage.removeItem('filmycosmo_session_movies_v5');
+    } catch (e) {
+      // Ignore storage cleanup errors
+    }
+  }, []);
+
+  // Track online/offline status and automatically trigger refetch on reconnect
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      refetch();
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [refetch]);
+
+  // Update lastUpdated timestamp and trigger background poster preloading when fresh movies arrive
+  useEffect(() => {
+    if (movies && movies.length > 0) {
+      setLastUpdated(new Date());
+      preloadPosters(movies, 30);
+    }
+  }, [movies]);
 
   // Filters State
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -30,64 +95,6 @@ export function MovieProvider({ children }) {
   const [selectedTerm, setSelectedTerm] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-  // Background Data Synchronizer
-  const loadMoviesData = useCallback(async (isSilent = false) => {
-    if (!isSilent && movies.length === 0) {
-      setLoading(true);
-    }
-    setError(null);
-
-    try {
-      await fetchMoviesProgressively({
-        onProgress: (page1Movies) => {
-          setMovies(prev => {
-            if (!prev || prev.length === 0) return page1Movies;
-            const existingIds = new Set(prev.map(m => m.id));
-            const newItems = page1Movies.filter(m => !existingIds.has(m.id));
-            if (newItems.length > 0) {
-              return [...newItems, ...prev];
-            }
-            return prev;
-          });
-          setLoading(false);
-        },
-        onComplete: (allMovies) => {
-          setMovies(prev => {
-            if (!prev || prev.length === 0 || prev.length !== allMovies.length) {
-              return allMovies;
-            }
-            return prev;
-          });
-          setLastUpdated(new Date());
-          setLoading(false);
-        }
-      });
-    } catch (err) {
-      console.error('Error in MovieContext fetch:', err);
-      if (movies.length === 0) {
-        setError(err.message || 'Failed to connect to FilmyCosmo API');
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [movies.length]);
-
-  // Initial Load + Silent Background Polling for New API Movies (Every 45 seconds)
-  useEffect(() => {
-    let controller = new AbortController();
-    
-    loadMoviesData(movies.length > 0);
-
-    const interval = setInterval(() => {
-      loadMoviesData(true);
-    }, 45000);
-
-    return () => {
-      controller.abort();
-      clearInterval(interval);
-    };
-  }, [loadMoviesData, movies.length]);
 
   // Derived Dynamic Categories, Genres, Terms
   const categories = useMemo(() => extractCategories(movies), [movies]);
@@ -133,30 +140,38 @@ export function MovieProvider({ children }) {
     setSearchQuery('');
   }, []);
 
-  // LocalStorage Saved Movies State (NO id or downloads array stored)
+  // Saved Movies (Watchlist) State using LocalStorage persistence (WITHOUT poster property)
   const [savedMovies, setSavedMovies] = useState(() => {
     try {
-      const stored = localStorage.getItem('filmycosmo_saved_movies');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
-          return parsed.map(sanitizeSavedMovie).filter(Boolean);
-        }
-      }
-      return [];
-    } catch {
+      const saved = localStorage.getItem('filmycosmo_saved_movies');
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed.map(m => sanitizeSavedMovie(m)).filter(Boolean) : [];
+    } catch (e) {
+      console.error('Failed to load saved movies from localStorage:', e);
       return [];
     }
   });
 
+  // Sync savedMovies state changes directly to localStorage
   useEffect(() => {
     try {
-      const sanitized = savedMovies.map(sanitizeSavedMovie).filter(Boolean);
-      localStorage.setItem('filmycosmo_saved_movies', JSON.stringify(sanitized));
+      localStorage.setItem('filmycosmo_saved_movies', JSON.stringify(savedMovies));
     } catch (e) {
-      console.error('Error saving watchlist to localStorage:', e);
+      console.error('Failed to persist saved movies to localStorage:', e);
     }
   }, [savedMovies]);
+
+  // Dynamically hydrate saved movies with full catalog movie objects for UI rendering
+  const hydratedSavedMovies = useMemo(() => {
+    return savedMovies.map(saved => {
+      const fullMovie = movies.find(m => 
+        (saved.slug && m.slug === saved.slug) || 
+        (saved.id && String(m.id) === String(saved.id)) || 
+        (saved.title && m.title === saved.title)
+      );
+      return fullMovie || saved;
+    });
+  }, [savedMovies, movies]);
 
   const isMovieSaved = useCallback((movieIdOrSlug) => {
     if (!movieIdOrSlug) return false;
@@ -214,11 +229,13 @@ export function MovieProvider({ children }) {
     trendingMovies,
     recentlyAddedMovies,
     heroMovie,
-    savedMovies,
+    savedMovies: hydratedSavedMovies,
     isMovieSaved,
     toggleSaveMovie,
-    refreshMovies: () => loadMoviesData(false),
-    resetFilters
+    refreshMovies: () => refetch(),
+    resetFilters,
+    isOnline,
+    isRefreshing
   };
 
   return (

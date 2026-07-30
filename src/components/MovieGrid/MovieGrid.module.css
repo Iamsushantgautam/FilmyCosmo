@@ -3,6 +3,14 @@
   grid-template-columns: repeat(6, 1fr);
   gap: var(--spacing-md);
   margin-bottom: var(--spacing-xl);
+  transition: opacity 150ms ease-in-out, transform 150ms ease-in-out;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.gridTransitioning {
+  opacity: 0.15;
+  transform: translateY(4px);
 }
 
 .emptyState {

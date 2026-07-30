@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMovieContext } from '../../context/MovieContext';
 import { RatingBadge } from '../Badges/Badges';
@@ -8,7 +8,24 @@ import styles from './MovieCard.module.css';
 function MovieCardComponent({ movie, isTrending = false, rank }) {
   const navigate = useNavigate();
   const { isMovieSaved, toggleSaveMovie } = useMovieContext();
+  const [displayedPoster, setDisplayedPoster] = useState(movie?.poster || '');
   const [imgError, setImgError] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!movie?.poster) return;
+    if (movie.poster !== displayedPoster) {
+      const img = new Image();
+      img.src = movie.poster;
+      img.onload = () => {
+        setDisplayedPoster(movie.poster);
+        setImgLoaded(true);
+      };
+      img.onerror = () => {
+        setImgError(true);
+      };
+    }
+  }, [movie?.poster]);
 
   if (!movie) return null;
 
@@ -22,6 +39,8 @@ function MovieCardComponent({ movie, isTrending = false, rank }) {
     e.stopPropagation();
     toggleSaveMovie(movie);
   };
+
+  const currentPoster = displayedPoster || movie.poster;
 
   return (
     <div
@@ -57,13 +76,14 @@ function MovieCardComponent({ movie, isTrending = false, rank }) {
           </svg>
         </button>
 
-        {movie.poster && !imgError ? (
+        {currentPoster && !imgError ? (
           <img
-            src={movie.poster}
+            src={currentPoster}
             alt={movie.title}
-            className={styles.posterImg}
+            className={`${styles.posterImg} ${imgLoaded ? styles.imgLoaded : ''}`}
             loading="lazy"
             decoding="async"
+            onLoad={() => setImgLoaded(true)}
             onError={() => setImgError(true)}
           />
         ) : (
