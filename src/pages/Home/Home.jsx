@@ -56,7 +56,7 @@ export default function Home() {
     let list = [];
 
     if (section.type === 'trending') {
-      list = trendingMovies.slice(0, limit);
+      return trendingMovies.slice(0, limit);
     } else if (section.type === 'recentlyAdded' || section.type === 'newreleases') {
       list = recentlyAddedMovies.slice(0, limit);
     } else if (section.type === 'myList' || section.type === 'saved') {

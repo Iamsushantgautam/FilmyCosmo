@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
-import { fetchMovies, fetchMoviesProgressively, getStoredMovies, setStoredMovies, preloadPosters, fetchAllMovies } from '../services/api';
+import { fetchMovies, fetchMoviesProgressively, getStoredMovies, setStoredMovies, preloadPosters, fetchAllMovies, fetchTrendingMovies } from '../services/api';
 import { extractCategories, extractGenres, extractTerms, filterMovies } from '../utils/filter';
 import { searchMovies } from '../utils/search';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
@@ -40,6 +40,18 @@ export function MovieProvider({ children }) {
     refetchOnMount: false,
     placeholderData: keepPreviousData,
     refetchInterval: 45000, // Silent Background Polling for New API Movies (Every 45 seconds)
+  });
+
+  // Dedicated React Query query for Top 10 Trending Movies from /api/movies?trending=true
+  const { data: apiTrendingMovies = [] } = useQuery({
+    queryKey: ['trendingMovies'],
+    queryFn: ({ signal }) => fetchTrendingMovies(10, signal),
+    staleTime: 300000,
+    gcTime: 1800000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: true,
+    refetchOnMount: false,
+    refetchInterval: 45000,
   });
 
   const loading = isLoading && movies.length === 0;
@@ -103,11 +115,14 @@ export function MovieProvider({ children }) {
 
   // Special Collection Views (Trending, Recently Added, Hero)
   const trendingMovies = useMemo(() => {
+    if (Array.isArray(apiTrendingMovies) && apiTrendingMovies.length > 0) {
+      return apiTrendingMovies.slice(0, 10);
+    }
     const explicit = movies.filter(m => m.isTrending);
-    if (explicit.length >= 10) return explicit;
+    if (explicit.length > 0) return explicit.slice(0, 10);
     const sorted = [...movies].sort((a, b) => (b.views || 0) - (a.views || 0));
     return sorted.slice(0, 10);
-  }, [movies]);
+  }, [apiTrendingMovies, movies]);
 
   const recentlyAddedMovies = useMemo(() => {
     return [...movies].slice(0, 50);

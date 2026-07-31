@@ -241,6 +241,50 @@ export function preloadPosters(movies = [], limit = 15) {
 }
 
 /**
+ * Fetch top trending movies directly from FilmyCosmo API (/api/movies?trending=true)
+ */
+export async function fetchTrendingMovies(limit = 10, signal) {
+  const cacheKey = `trending_movies_${limit}`;
+
+  const cached = getCachedData(cacheKey);
+  if (cached) {
+    preloadPosters(cached, limit);
+    return cached;
+  }
+
+  try {
+    const response = await apiClient.get('/movies', {
+      params: { trending: 'true', limit },
+      signal
+    });
+    const data = response.data;
+
+    let rawList = [];
+    if (Array.isArray(data)) {
+      rawList = data;
+    } else if (data && data.success && Array.isArray(data.data)) {
+      rawList = data.data;
+    } else if (data && Array.isArray(data.movies)) {
+      rawList = data.movies;
+    } else if (data && Array.isArray(data.data)) {
+      rawList = data.data;
+    }
+
+    const normalized = rawList.map((item, idx) => normalizeMovie(item, idx)).filter(Boolean);
+    setCachedData(cacheKey, normalized);
+    preloadPosters(normalized, limit);
+    return normalized;
+  } catch (error) {
+    if (axios.isCancel(error)) {
+      console.log('Trending fetch canceled:', error.message);
+    } else {
+      console.error('Failed to fetch trending movies from API:', error);
+    }
+    return [];
+  }
+}
+
+/**
  * Fetch movies from FilmyCosmo API with fast caching and page support
  */
 export async function fetchMovies(page = null, limit = 30, signal) {
