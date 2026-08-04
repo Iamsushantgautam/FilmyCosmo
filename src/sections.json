@@ -34,6 +34,14 @@
     "limit": 50
   },
   {
+    "id": "Reality Shows",
+    "title": "Reality Shows",
+    "type": "category",
+    "category": "Reality Shows, Reality Show, Reality-Show, Reality",
+    "viewAllLink": "/category/Reality Shows",
+    "limit": 50
+  },
+  {
     "id": "hollywood",
     "title": "Hollywood Movies",
     "type": "category",
